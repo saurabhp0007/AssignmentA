@@ -1,45 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
 import axios from 'axios';
 
-// Register the required components with Chart.js
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
-
-const SalesDashboard = () => {
-    const [totalSalesData, setTotalSalesData] = useState({
+const NewCustomersChart = () => {
+    const [newCustomersData, setNewCustomersData] = useState({
         labels: [],
         datasets: []
     });
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/orders/total-sales')
+        axios.get('http://localhost:8000/api/customers/new-customers')
             .then(response => {
-                if (response.data && response.data.labels && response.data.sales) {
-                    setTotalSalesData({
+                if (response.data && response.data.labels && response.data.newCustomers) {
+                    setNewCustomersData({
                         labels: response.data.labels,
                         datasets: [{
-                            label: 'Total Sales',
-                            data: response.data.sales,
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
+                            label: 'New Customers',
+                            data: response.data.newCustomers,
+                            backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                            borderColor: 'rgba(255, 159, 64, 1)',
                             borderWidth: 1,
                             fill: true,
                         }]
@@ -49,16 +28,16 @@ const SalesDashboard = () => {
                 }
             })
             .catch(error => {
-                console.error('Error fetching total sales data:', error);
+                console.error('Error fetching new customers data:', error);
             });
     }, []);
 
     return (
         <div>
-            <h2>Total Sales Over Time</h2>
-            {totalSalesData.labels.length > 0 ? (
+            <h2>New Customers Added Over Time</h2>
+            {newCustomersData.labels.length > 0 ? (
                 <Line 
-                    data={totalSalesData}
+                    data={newCustomersData}
                     options={{
                         responsive: true,
                         scales: {
@@ -71,7 +50,7 @@ const SalesDashboard = () => {
                             y: {
                                 title: {
                                     display: true,
-                                    text: 'Sales in INR'
+                                    text: 'Number of Customers'
                                 }
                             }
                         },
@@ -82,7 +61,7 @@ const SalesDashboard = () => {
                             },
                             title: {
                                 display: true,
-                                text: 'Total Sales Over Time',
+                                text: 'New Customers Added Over Time',
                             },
                         },
                     }}
@@ -94,4 +73,4 @@ const SalesDashboard = () => {
     );
 };
 
-export default SalesDashboard;
+export default NewCustomersChart;
