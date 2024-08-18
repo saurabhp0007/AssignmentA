@@ -12,7 +12,6 @@ import {
 } from 'chart.js';
 import axios from 'axios';
 
-// Register the required components with Chart.js
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -28,9 +27,10 @@ const SalesDashboard = () => {
         labels: [],
         datasets: []
     });
+    const [interval, setInterval] = useState('monthly'); // State to manage the selected interval
 
-    useEffect(() => {
-        axios.get('http://localhost:8000/api/orders/total-sales')
+    const fetchData = () => {
+        axios.get(`http://localhost:8000/api/orders/total-sales?interval=${interval}`)
             .then(response => {
                 if (response.data && response.data.labels && response.data.sales) {
                     setTotalSalesData({
@@ -51,11 +51,21 @@ const SalesDashboard = () => {
             .catch(error => {
                 console.error('Error fetching total sales data:', error);
             });
-    }, []);
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [interval]); // Fetch data when the interval changes
 
     return (
         <div>
             <h2>Total Sales Over Time</h2>
+            <select onChange={e => setInterval(e.target.value)} value={interval}>
+                <option value="daily">Daily</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+            </select>
             {totalSalesData.labels.length > 0 ? (
                 <Line 
                     data={totalSalesData}
@@ -65,7 +75,7 @@ const SalesDashboard = () => {
                             x: {
                                 title: {
                                     display: true,
-                                    text: 'Month'
+                                    text: interval === 'daily' ? 'Date' : interval === 'monthly' ? 'Month' : interval === 'quarterly' ? 'Quarter' : 'Year'
                                 }
                             },
                             y: {
@@ -82,7 +92,7 @@ const SalesDashboard = () => {
                             },
                             title: {
                                 display: true,
-                                text: 'Total Sales Over Time',
+                                text: `Total Sales Over Time (${interval.charAt(0).toUpperCase() + interval.slice(1)})`,
                             },
                         },
                     }}

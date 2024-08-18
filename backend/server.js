@@ -17,13 +17,33 @@ const ShopifyCustomer = mongoose.model('ShopifyCustomer', new mongoose.Schema({}
 
 // Total Sales Over Time
 app.get('/api/orders/total-sales', async (req, res) => {
+    const { interval = 'monthly' } = req.query; // Default to monthly if not specified
+
+    let dateFormat;
+    switch (interval) {
+        case 'daily':
+            dateFormat = "%Y-%m-%d";
+            break;
+        case 'monthly':
+            dateFormat = "%Y-%m";
+            break;
+        case 'quarterly':
+            dateFormat = "%Y-Q";
+            break;
+        case 'yearly':
+            dateFormat = "%Y";
+            break;
+        default:
+            dateFormat = "%Y-%m"; // Default to monthly
+    }
+
     try {
         const orders = await ShopifyOrder.aggregate([
             {
                 $project: {
                     date: {
                         $dateToString: {
-                            format: "%Y-%m", // Change to "%Y-%m-%d" for daily or "%Y" for yearly
+                            format: dateFormat,
                             date: {
                                 $cond: {
                                     if: { $isNumber: "$created_at" },
@@ -58,6 +78,7 @@ app.get('/api/orders/total-sales', async (req, res) => {
         res.status(500).json({ error: error.message || 'Server error' });
     }
 });
+
 
 // Sales Growth Rate Over Time
 app.get('/api/orders/sales-growth-rate', async (req, res) => {
@@ -164,21 +185,50 @@ app.get('/api/customers/new-customers', async (req, res) => {
 // Number of Repeat Customers
 app.get('/api/customers/repeat-customers', async (req, res) => {
     try {
+        const interval = req.query.interval || 'monthly'; // Default to monthly
+        let dateFormat;
+
+        // Determine the date format based on the interval
+        switch (interval) {
+            case 'yearly':
+                dateFormat = "%Y";
+                break;
+            case 'quarterly':
+                dateFormat = {
+                    $concat: [
+                        { $substr: [{ $year: { $dateFromString: { dateString: "$customerDetails.created_at" } } }, 0, 4] },
+                        "-Q",
+                        {
+                            $substr: [
+                                { $ceil: { $divide: [{ $month: { $dateFromString: { dateString: "$customerDetails.created_at" } } }, 3] } }, 0, 1
+                            ]
+                        }
+                    ]
+                };
+                break;
+            case 'daily':
+                dateFormat = "%Y-%m-%d";
+                break;
+            case 'monthly':
+            default:
+                dateFormat = "%Y-%m";
+        }
+
         const repeatCustomers = await ShopifyOrder.aggregate([
             {
                 $group: {
-                    _id: "$customer.email", // Group by customer email to identify unique customers
+                    _id: "$customer.email",
                     purchaseCount: { $sum: 1 }
                 }
             },
             {
                 $match: {
-                    purchaseCount: { $gt: 1 } // Only include customers with more than one purchase
+                    purchaseCount: { $gt: 1 }
                 }
             },
             {
                 $lookup: {
-                    from: 'shopifyCustomers', // Join with shopifyCustomers collection to get creation dates
+                    from: 'shopifyCustomers',
                     localField: '_id',
                     foreignField: 'email',
                     as: 'customerDetails'
@@ -189,7 +239,7 @@ app.get('/api/customers/repeat-customers', async (req, res) => {
                 $project: {
                     date: {
                         $dateToString: {
-                            format: "%Y-%m", // Group by month
+                            format: dateFormat,
                             date: {
                                 $cond: {
                                     if: { $isNumber: "$customerDetails.created_at" },
@@ -223,6 +273,7 @@ app.get('/api/customers/repeat-customers', async (req, res) => {
         res.status(500).json({ error: error.message || 'Server error' });
     }
 });
+
 
 
 // Geographical Distribution of Customers
