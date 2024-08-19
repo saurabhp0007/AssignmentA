@@ -28,7 +28,7 @@ const GeographicalDistributionChart = () => {
     });
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/customers/geographical-distribution')
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/customers/geographical-distribution`)
             .then(response => {
                 if (response.data && response.data.cities && response.data.customerCount) {
                     setGeoDistributionData({

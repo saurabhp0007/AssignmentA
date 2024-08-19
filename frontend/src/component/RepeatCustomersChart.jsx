@@ -1,3 +1,4 @@
+// RepeatCustomersChart.jsx
 import React, { useEffect, useState } from 'react';
 import { Radar, Bar } from 'react-chartjs-2';
 import axios from 'axios';
@@ -8,10 +9,10 @@ const RepeatCustomersChart = () => {
         radarData: [],
         barData: []
     });
-    const [interval, setInterval] = useState('monthly'); // Default to monthly
+    const [interval, setInterval] = useState('monthly');
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/customers/repeat-customers?interval=${interval}`)
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/customers/repeat-customers?interval=${interval}`)
             .then(response => {
                 if (response.data && response.data.labels && response.data.repeatCustomers) {
                     setChartData({

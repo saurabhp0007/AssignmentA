@@ -30,7 +30,7 @@ const SalesDashboard = () => {
     const [interval, setInterval] = useState('monthly'); // State to manage the selected interval
 
     const fetchData = () => {
-        axios.get(`http://localhost:8000/api/orders/total-sales?interval=${interval}`)
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/total-sales?interval=${interval}`)
             .then(response => {
                 if (response.data && response.data.labels && response.data.sales) {
                     setTotalSalesData({

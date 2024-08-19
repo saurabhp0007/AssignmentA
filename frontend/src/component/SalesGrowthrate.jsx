@@ -1,3 +1,4 @@
+// SalesGrowthRateChart.jsx
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import axios from 'axios';
@@ -9,7 +10,7 @@ const SalesGrowthRateChart = () => {
     });
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/orders/sales-growth-rate')
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/sales-growth-rate`)
             .then(response => {
                 if (response.data && response.data.labels && response.data.growthRates) {
                     setGrowthRateData({

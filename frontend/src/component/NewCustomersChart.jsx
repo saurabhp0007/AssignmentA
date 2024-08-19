@@ -9,7 +9,7 @@ const NewCustomersChart = () => {
     });
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/customers/new-customers')
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/customers/new-customers`)
             .then(response => {
                 if (response.data && response.data.labels && response.data.newCustomers) {
                     setNewCustomersData({

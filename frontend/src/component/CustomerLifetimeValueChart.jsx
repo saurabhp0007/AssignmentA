@@ -24,7 +24,7 @@ const CustomerLifetimeValueChart = () => {
     });
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/customers/lifetime-value-cohorts')
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/customers/lifetime-value-cohorts`)
             .then(response => {
                 if (response.data && response.data.cohorts && response.data.lifetimeValue) {
                     const chartData = {
